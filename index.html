@@ -7,7 +7,7 @@
   
   <script src="https://cdnjs.cloudflare.com/ajax/libs/react/18.2.0/umd/react.production.min.js" crossorigin></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.2.0/umd/react-dom.production.min.js" crossorigin></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/lucide/0.383.0/umd/lucide.min.js" crossorigin></script>
+<script src="https://unpkg.com/lucide@0.383.0/dist/umd/lucide.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js" crossorigin></script>
 
   <script src="https://cdnjs.cloudflare.com/ajax/libs/babel-standalone/7.23.5/babel.min.js" crossorigin></script>
@@ -22,22 +22,28 @@
   <div id="root"></div>
   <script type="text/babel">
     // ── React hooks (from CDN global)
-   <script type="text/babel">
-  // Safely extract hooks from React
+  <script type="text/babel">
   const { useState, useRef, useCallback, useEffect, useMemo } = React;
 
-  // Safely get icons. We use a proxy-like approach so the app doesn't crash
-  const getIcon = (name) => {
-    if (window.lucide && window.lucide[name]) return window.lucide[name];
-    // Fallback if icon isn't ready: return a simple square
-    return () => <span style={{display:'inline-block', width:'1em', height:'1em', border:'1px solid'}}/>;
-  };
+  // Use a standard function declaration to avoid "Unexpected Token" errors in Babel
+  function getIcon(name) {
+    if (window.lucide && window.lucide[name]) {
+      return window.lucide[name];
+    }
+    // Simple fallback: a blank SVG-like span
+    return function() { 
+      return <span style={{display:'inline-block', width:'1em', height:'1em'}} />; 
+    };
+  }
 
   const Upload = getIcon('Upload');
   const FileText = getIcon('FileText');
   const ShieldCheck = getIcon('ShieldCheck');
   const Loader2 = getIcon('Loader2');
   const AlertCircle = getIcon('AlertCircle');
+  const CheckCircle = getIcon('CheckCircle');
+  const XCircle = getIcon('XCircle');
+  // ... add any other icons you need here
   // ... (Repeat for any other icons used in the Gate)
     
     // ── JSZip lazy loader ──────────────────────────────────────────────────
@@ -4317,6 +4323,7 @@ const startApp = () => {
     const container = document.getElementById('root');
     if (!container) return;
     
+    // Check if React and Lucide are ready
     if (typeof React === 'undefined' || typeof window.lucide === 'undefined') {
       console.log("Libraries still missing... retrying");
       setTimeout(startApp, 200);
@@ -4324,11 +4331,16 @@ const startApp = () => {
     }
 
     const root = ReactDOM.createRoot(container);
-    root.render(<App />);
+    // Use React.createElement to avoid any potential JSX parsing issues at the root
+    root.render(React.createElement(App));
   };
 
   // Run when the window finishes loading everything
-  window.addEventListener('load', startApp);
+  if (document.readyState === 'complete') {
+    startApp();
+  } else {
+    window.addEventListener('load', startApp);
+  }
 </script>
 </body>
 </html>
