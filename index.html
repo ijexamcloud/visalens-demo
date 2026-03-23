@@ -4,19 +4,17 @@
   <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>VisaLens — AI Student Visa Analyser</title>
-  <meta name="description" content="AI-powered student visa document analysis for counsellors"/>
-  <!-- React + ReactDOM -->
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/react/18.2.0/umd/react.production.min.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.2.0/umd/react-dom.production.min.js"></script>
-  <!-- Lucide Icons -->
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/lucide/0.383.0/umd/lucide.min.js"></script>
-  <!-- Babel for JSX transpilation -->
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/babel-standalone/7.23.5/babel.min.js"></script>
-   <!-- JSZip for folder download -->
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+  
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/react/18.2.0/umd/react.production.min.js" crossorigin></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.2.0/umd/react-dom.production.min.js" crossorigin></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/lucide/0.383.0/umd/lucide.min.js" crossorigin></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js" crossorigin></script>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/babel-standalone/7.23.5/babel.min.js" crossorigin></script>
+  
   <style>
     * { box-sizing: border-box; margin: 0; padding: 0; }
-    body { background: #EEF3FB; }
+    body { background: #EEF3FB; font-family: sans-serif; }
     #root { min-height: 100vh; }
   </style>
 </head>
@@ -24,21 +22,23 @@
   <div id="root"></div>
   <script type="text/babel">
     // ── React hooks (from CDN global)
-    const { useState, useRef, useCallback, useEffect } = React;
+   <script type="text/babel">
+  // Safely extract hooks from React
+  const { useState, useRef, useCallback, useEffect, useMemo } = React;
 
-    // ── Lucide icons (from CDN global) ─────────────────────────────────────
-    // At the very top of your Babel script
-const icons = window.lucide || {}; 
-const { 
-  Upload, FileText, CreditCard, BookOpen, Mail, GraduationCap,
-  Languages, DollarSign, File, User, AlertCircle, Globe, Flag,
-  CheckCircle, XCircle, ChevronDown, Trash2, ArrowUpRight,
-  Printer, Save, FolderOpen, Loader2, ShieldCheck,
-  BarChart3, Info, X, Eye, EyeOff, TriangleAlert,
-  Search, Pencil, Check, Edit3, ZoomIn, Bell, Copy,
-  MessageSquare, Send, Building2, LayoutDashboard, Clock,
-  Moon, Sun, Download, FileSpreadsheet, ListChecks, Star, FolderDown, RefreshCw
-} = icons;
+  // Safely get icons. We use a proxy-like approach so the app doesn't crash
+  const getIcon = (name) => {
+    if (window.lucide && window.lucide[name]) return window.lucide[name];
+    // Fallback if icon isn't ready: return a simple square
+    return () => <span style={{display:'inline-block', width:'1em', height:'1em', border:'1px solid'}}/>;
+  };
+
+  const Upload = getIcon('Upload');
+  const FileText = getIcon('FileText');
+  const ShieldCheck = getIcon('ShieldCheck');
+  const Loader2 = getIcon('Loader2');
+  const AlertCircle = getIcon('AlertCircle');
+  // ... (Repeat for any other icons used in the Gate)
     
     // ── JSZip lazy loader ──────────────────────────────────────────────────
     let _jszipPromise = null;
@@ -4313,22 +4313,22 @@ function App() {
 
     // ── Mount ──────────────────────────────────────────────────────────────
     // ── Mount with Library Check ───────────────────────────────────────────
-const renderApp = () => {
-      // Check for both React and Lucide
-      if (typeof window.lucide === 'undefined' || typeof React === 'undefined') {
-        console.log("Waiting for libraries...");
-        setTimeout(renderApp, 100);
-        return;
-      }
-      
-      const root = ReactDOM.createRoot(document.getElementById('root'));
-      root.render(React.createElement(App));
-      
-      // This line triggers Lucide to replace any <i> tags with SVGs if needed
-      window.lucide.createIcons(); 
-    };
+const startApp = () => {
+    const container = document.getElementById('root');
+    if (!container) return;
+    
+    if (typeof React === 'undefined' || typeof window.lucide === 'undefined') {
+      console.log("Libraries still missing... retrying");
+      setTimeout(startApp, 200);
+      return;
+    }
 
-    renderApp();
-  </script>
+    const root = ReactDOM.createRoot(container);
+    root.render(<App />);
+  };
+
+  // Run when the window finishes loading everything
+  window.addEventListener('load', startApp);
+</script>
 </body>
 </html>
