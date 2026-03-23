@@ -7,7 +7,7 @@
   
   <script src="https://cdnjs.cloudflare.com/ajax/libs/react/18.2.0/umd/react.production.min.js" crossorigin></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.2.0/umd/react-dom.production.min.js" crossorigin></script>
-  <script src="https://cdn.jsdelivr.net/npm/lucide@0.383.0/dist/umd/lucide.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/lucide-react@0.383.0/dist/umd/lucide-react.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js" crossorigin></script>
 
   <script src="https://cdnjs.cloudflare.com/ajax/libs/babel-standalone/7.23.5/babel.min.js" crossorigin></script>
@@ -29,37 +29,13 @@
    */
   /**
    * ICON SETUP
-   * lucide@0.383.0 UMD exports icons as plain objects { render, ... }, NOT as
-   * callable React components. We must wrap each one so React can render it.
-   * createIcon() checks if the export is already a function (future-proof) or
-   * wraps the object via lucide.createElement (the correct v0.3x API).
+   * lucide-react@0.383.0 UMD exposes every icon as a proper React component
+   * under window.LucideReact (e.g. window.LucideReact.AlertCircle).
+   * We just look them up directly — no wrapping required.
    */
-  const _noIcon = (props) => React.createElement('span', null);
-
-  function createIcon(name) {
-    if (!window.lucide) return _noIcon;
-    const raw = window.lucide[name];
-    if (!raw) return _noIcon;
-    // Already a callable component (some builds / future versions)
-    if (typeof raw === 'function') return raw;
-    // UMD object shape — wrap with lucide.createElement
-    if (typeof window.lucide.createElement === 'function') {
-      return (props) => window.lucide.createElement(name, props);
-    }
-    // Last-resort: hand-roll an SVG wrapper via the icon's toSvg / render method
-    if (typeof raw.render === 'function') {
-      return (props) => {
-        const { size = 24, color = 'currentColor', strokeWidth = 2, ...rest } = props || {};
-        const svgStr = raw.render({ size, color, strokeWidth });
-        return React.createElement('span', {
-          ...rest,
-          style: { display:'inline-flex', ...rest.style },
-          dangerouslySetInnerHTML: { __html: svgStr }
-        });
-      };
-    }
-    return _noIcon;
-  }
+  const _LR = window.LucideReact || {};
+  const _noIcon = () => null;
+  const createIcon = (name) => _LR[name] || _noIcon;
 
   const AlertCircle     = createIcon('AlertCircle');
   const BarChart3       = createIcon('BarChart3');
