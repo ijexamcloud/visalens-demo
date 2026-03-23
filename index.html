@@ -7,7 +7,7 @@
   
   <script src="https://cdnjs.cloudflare.com/ajax/libs/react/18.2.0/umd/react.production.min.js" crossorigin></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.2.0/umd/react-dom.production.min.js" crossorigin></script>
-  <script src="https://unpkg.com/lucide@0.383.0/dist/umd/lucide.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/lucide@0.383.0/dist/umd/lucide.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js" crossorigin></script>
 
   <script src="https://cdnjs.cloudflare.com/ajax/libs/babel-standalone/7.23.5/babel.min.js" crossorigin></script>
@@ -27,19 +27,94 @@
    * This automatically maps every Lucide icon to a global variable 
    * so your existing code doesn't need to change.
    */
-  if (window.lucide) {
-    Object.keys(window.lucide).forEach(iconName => {
-      window[iconName] = window.lucide[iconName];
-    });
+  /**
+   * ICON SETUP
+   * lucide@0.383.0 UMD exports icons as plain objects { render, ... }, NOT as
+   * callable React components. We must wrap each one so React can render it.
+   * createIcon() checks if the export is already a function (future-proof) or
+   * wraps the object via lucide.createElement (the correct v0.3x API).
+   */
+  const _noIcon = (props) => React.createElement('span', null);
+
+  function createIcon(name) {
+    if (!window.lucide) return _noIcon;
+    const raw = window.lucide[name];
+    if (!raw) return _noIcon;
+    // Already a callable component (some builds / future versions)
+    if (typeof raw === 'function') return raw;
+    // UMD object shape — wrap with lucide.createElement
+    if (typeof window.lucide.createElement === 'function') {
+      return (props) => window.lucide.createElement(name, props);
+    }
+    // Last-resort: hand-roll an SVG wrapper via the icon's toSvg / render method
+    if (typeof raw.render === 'function') {
+      return (props) => {
+        const { size = 24, color = 'currentColor', strokeWidth = 2, ...rest } = props || {};
+        const svgStr = raw.render({ size, color, strokeWidth });
+        return React.createElement('span', {
+          ...rest,
+          style: { display:'inline-flex', ...rest.style },
+          dangerouslySetInnerHTML: { __html: svgStr }
+        });
+      };
+    }
+    return _noIcon;
   }
 
-  // Fallback for the icons your app specifically complained about:
-  const CreditCard = window.CreditCard || (() => <span />);
-  const BookOpen = window.BookOpen || (() => <span />);
-  const GraduationCap = window.GraduationCap || (() => <span />);
-  // ... any others that cause a crash will now be handled by the loop above.
-  // ... add any other icons you need here
-  // ... (Repeat for any other icons used in the Gate)
+  const AlertCircle     = createIcon('AlertCircle');
+  const BarChart3       = createIcon('BarChart3');
+  const Building2       = createIcon('Building2');
+  const Dot             = createIcon('Dot');
+  const Edit3           = createIcon('Edit3');
+  const Home            = createIcon('Home');
+  const Plus            = createIcon('Plus');
+  const Share           = createIcon('Share');
+  const Target          = createIcon('Target');
+  const Trash2          = createIcon('Trash2');
+  const X               = createIcon('X');
+  const ArrowUpRight    = createIcon('ArrowUpRight');
+  const Bell            = createIcon('Bell');
+  const BookOpen        = createIcon('BookOpen');
+  const Check           = createIcon('Check');
+  const CheckCircle     = createIcon('CheckCircle');
+  const ChevronDown     = createIcon('ChevronDown');
+  const Clock           = createIcon('Clock');
+  const Copy            = createIcon('Copy');
+  const CreditCard      = createIcon('CreditCard');
+  const DollarSign      = createIcon('DollarSign');
+  const Download        = createIcon('Download');
+  const Eye             = createIcon('Eye');
+  const EyeOff          = createIcon('EyeOff');
+  const File            = createIcon('File');
+  const FileSpreadsheet = createIcon('FileSpreadsheet');
+  const FileText        = createIcon('FileText');
+  const Flag            = createIcon('Flag');
+  const FolderDown      = createIcon('FolderDown');
+  const FolderOpen      = createIcon('FolderOpen');
+  const Globe           = createIcon('Globe');
+  const GraduationCap   = createIcon('GraduationCap');
+  const Info            = createIcon('Info');
+  const Languages       = createIcon('Languages');
+  const LayoutDashboard = createIcon('LayoutDashboard');
+  const ListChecks      = createIcon('ListChecks');
+  const Loader2         = createIcon('Loader2');
+  const Mail            = createIcon('Mail');
+  const MessageSquare   = createIcon('MessageSquare');
+  const Moon            = createIcon('Moon');
+  const Pencil          = createIcon('Pencil');
+  const Printer         = createIcon('Printer');
+  const RefreshCw       = createIcon('RefreshCw');
+  const Save            = createIcon('Save');
+  const Search          = createIcon('Search');
+  const Send            = createIcon('Send');
+  const ShieldCheck     = createIcon('ShieldCheck');
+  const Star            = createIcon('Star');
+  const Sun             = createIcon('Sun');
+  const TriangleAlert   = createIcon('TriangleAlert');
+  const Upload          = createIcon('Upload');
+  const User            = createIcon('User');
+  const XCircle         = createIcon('XCircle');
+  const ZoomIn          = createIcon('ZoomIn');
     
     // ── JSZip lazy loader ──────────────────────────────────────────────────
     let _jszipPromise = null;
@@ -3190,7 +3265,7 @@ function VisaLensApp() {
   }, [results]);
   useEffect(() => {
     (async () => {
-      try { const r = await window.storage.get("visalens_v14"); if(r) setCases(JSON.parse(r.value)); } catch {}
+      try { const r = await window.storage.get("visalens_v14"); if(r) { const parsed = JSON.parse(r.value); setCases(Array.isArray(parsed) ? parsed : []); } } catch {}
       try {
         const r = await window.storage.get("visalens_v14_reqs");
         if (r && r.value) {
@@ -3567,6 +3642,13 @@ Score 0-100. Keep summary and flag details concise. Return ONLY the JSON object.
       const raw    = await callAPI(content, 2500);
       const parsed = parseJSON(raw);
       if (!parsed) throw new Error("Could not parse analysis response — the AI returned an unexpected format. Please try again.");
+      // Ensure all expected array fields are always arrays, regardless of what the AI returned
+      const safeArr = (v) => Array.isArray(v) ? v : [];
+      parsed.rejections        = safeArr(parsed.rejections);
+      parsed.missingDocuments  = safeArr(parsed.missingDocuments);
+      parsed.redFlags          = safeArr(parsed.redFlags);
+      if (parsed.eligibility) parsed.eligibility.notes = safeArr(parsed.eligibility?.notes);
+      if (parsed.studentProfile) parsed.studentProfile.offerLetters = safeArr(parsed.studentProfile?.offerLetters);
       setResults(parsed);
       const migratedProfile = migrateOfferLetter({...parsed.studentProfile});
       setProfileData(migratedProfile);
@@ -3679,11 +3761,12 @@ Rules: scores 0-100. Summary max 2 sentences. Reflect any improvements from edit
       const raw    = data.content?.map(b=>b.text||"").join("")||"";
       const parsed = parseJSON(raw);
       if (parsed) {
+        const toArr = (v, fallback) => Array.isArray(v) ? v : fallback;
         setResults(prev => ({
           ...prev,
           eligibility:     parsed.eligibility     || prev.eligibility,
-          missingDocuments:parsed.missingDocuments || prev.missingDocuments,
-          redFlags:        parsed.redFlags         || prev.redFlags,
+          missingDocuments:toArr(parsed.missingDocuments, prev.missingDocuments),
+          redFlags:        toArr(parsed.redFlags,         prev.redFlags),
         }));
         setLiveElig(null);  // AI result replaces deterministic override
         setProfileDirty(false);
