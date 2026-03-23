@@ -4310,8 +4310,18 @@ function App() {
 }
 
     // ── Mount ──────────────────────────────────────────────────────────────
-    const root = ReactDOM.createRoot(document.getElementById('root'));
-    root.render(React.createElement(App));
+    // ── Mount with Library Check ───────────────────────────────────────────
+    const renderApp = () => {
+      // Check if Lucide is loaded, if not, wait 100ms and try again
+      if (typeof lucide === 'undefined') {
+        setTimeout(renderApp, 100);
+        return;
+      }
+      const root = ReactDOM.createRoot(document.getElementById('root'));
+      root.render(React.createElement(App));
+    };
+
+    renderApp();
   </script>
 </body>
 </html>
