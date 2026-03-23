@@ -8,11 +8,11 @@
   <!-- React + ReactDOM -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/react/18.2.0/umd/react.production.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.2.0/umd/react-dom.production.min.js"></script>
-  <!-- Babel for JSX transpilation -->
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/babel-standalone/7.23.5/babel.min.js"></script>
   <!-- Lucide Icons -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/lucide/0.383.0/umd/lucide.min.js"></script>
-  <!-- JSZip for folder download -->
+  <!-- Babel for JSX transpilation -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/babel-standalone/7.23.5/babel.min.js"></script>
+   <!-- JSZip for folder download -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
   <style>
     * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -27,17 +27,19 @@
     const { useState, useRef, useCallback, useEffect } = React;
 
     // ── Lucide icons (from CDN global) ─────────────────────────────────────
-    const {
-      Upload, FileText, CreditCard, BookOpen, Mail, GraduationCap,
-      Languages, DollarSign, File, User, AlertCircle, Globe, Flag,
-      CheckCircle, XCircle, ChevronDown, Trash2, ArrowUpRight,
-      Printer, Save, FolderOpen, Loader2, ShieldCheck,
-      BarChart3, Info, X, Eye, EyeOff, TriangleAlert,
-      Search, Pencil, Check, Edit3, ZoomIn, Bell, Copy,
-      MessageSquare, Send, Building2, LayoutDashboard, Clock,
-      Moon, Sun, Download, FileSpreadsheet, ListChecks, Star, FolderDown, RefreshCw
-    } = lucide;
-
+    // At the very top of your Babel script
+const icons = window.lucide || {}; 
+const { 
+  Upload, FileText, CreditCard, BookOpen, Mail, GraduationCap,
+  Languages, DollarSign, File, User, AlertCircle, Globe, Flag,
+  CheckCircle, XCircle, ChevronDown, Trash2, ArrowUpRight,
+  Printer, Save, FolderOpen, Loader2, ShieldCheck,
+  BarChart3, Info, X, Eye, EyeOff, TriangleAlert,
+  Search, Pencil, Check, Edit3, ZoomIn, Bell, Copy,
+  MessageSquare, Send, Building2, LayoutDashboard, Clock,
+  Moon, Sun, Download, FileSpreadsheet, ListChecks, Star, FolderDown, RefreshCw
+} = icons;
+    
     // ── JSZip lazy loader ──────────────────────────────────────────────────
     let _jszipPromise = null;
     function loadJSZip() {
@@ -4311,14 +4313,19 @@ function App() {
 
     // ── Mount ──────────────────────────────────────────────────────────────
     // ── Mount with Library Check ───────────────────────────────────────────
-    const renderApp = () => {
-      // Check if Lucide is loaded, if not, wait 100ms and try again
-      if (typeof lucide === 'undefined') {
+const renderApp = () => {
+      // Check for both React and Lucide
+      if (typeof window.lucide === 'undefined' || typeof React === 'undefined') {
+        console.log("Waiting for libraries...");
         setTimeout(renderApp, 100);
         return;
       }
+      
       const root = ReactDOM.createRoot(document.getElementById('root'));
       root.render(React.createElement(App));
+      
+      // This line triggers Lucide to replace any <i> tags with SVGs if needed
+      window.lucide.createIcons(); 
     };
 
     renderApp();
