@@ -24,8 +24,11 @@
 <body>
   <div id="root"></div>
 <script type="text/babel">
-  //  API KEY â€” swap this for each client demo, revoke after session
-  const ANTHROPIC_API_KEY = "sk-ant-YOUR-KEY-HERE";
+//  API KEY â€” swap this for each client demo, revoke after session
+  // ── FIREBASE PROXY URL ────────────────────────────────────────────────
+  // All Anthropic calls route through this Cloud Function — key never in browser
+  // Replace YOUR_PROJECT_ID with your actual Firebase project ID after deploy
+  const PROXY_URL = "/.netlify/functions/proxy";
   // 
   const { useState, useRef, useCallback, useEffect, useMemo } = React;
 
