@@ -24,7 +24,7 @@
 <body>
   <div id="root"></div>
 <script type="text/babel">
-//  API KEY â€” swap this for each client demo, revoke after session
+  //  API KEY â€” swap this for each client demo, revoke after session
   // ── FIREBASE PROXY URL ────────────────────────────────────────────────
   // All Anthropic calls route through this Cloud Function — key never in browser
   // Replace YOUR_PROJECT_ID with your actual Firebase project ID after deploy
@@ -2745,11 +2745,11 @@ function ChatPanel({ profileData, results, docs }) {
     setChatLoading(true);
     try {
       const systemPrompt = `You are VisaLens AI, an expert student visa counselling assistant. You have been given a fully extracted student profile below â€” do NOT ask to see documents again; use only the data provided.\n\nAnswer counsellor questions concisely and accurately. When referencing requirements (IELTS, GPA, financials), state both the requirement AND the student's actual value. Use "Not found" context to flag gaps. Keep answers under 200 words unless a longer breakdown is genuinely needed.\n\n${ctxString}`;
-      const resp = await fetch("https://api.anthropic.com/v1/messages", {
+      const resp = await fetch(PROXY_URL, {
         method: "POST",
-        headers: { "Content-Type": "application/json", "x-api-key": ANTHROPIC_API_KEY, "anthropic-version": "2023-06-01", "anthropic-dangerous-direct-browser-access": "true" },
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          model: "claude-sonnet-4-20250514",
+          model: "claude-haiku-4-5-20251001",
           max_tokens: 600,
           system: systemPrompt,
           messages: newMessages.map(m => ({ role: m.role, content: m.content })),
@@ -3396,9 +3396,9 @@ function VisaLensApp() {
     }
     try {
       const b64  = await fileToBase64(doc.file);
-      const resp = await fetch("https://api.anthropic.com/v1/messages", {
-        method:"POST", headers:{"Content-Type":"application/json","x-api-key":ANTHROPIC_API_KEY,"anthropic-version":"2023-06-01","anthropic-dangerous-direct-browser-access":"true"},
-        body:JSON.stringify({model:"claude-sonnet-4-20250514",max_tokens:150,messages:[{role:"user",content:[
+      const resp = await fetch(PROXY_URL, {
+        method:"POST", headers:{"Content-Type":"application/json"},
+        body:JSON.stringify({model: "claude-haiku-4-5-20251001",max_tokens:150,messages:[{role:"user",content:[
           {type:"image",source:{type:"base64",media_type:doc.file.type,data:b64}},
           {type:"text",text:`Assess readability. Reply ONLY JSON: {"status":"ok|warn|error","detail":"one sentence if warn/error, empty if ok"}`}
         ]}]})
@@ -3565,9 +3565,9 @@ ${notes ? `<div class="section"><div class="section-title">Counselor Notes</div>
   }
 
   async function callAPI(content, maxTokens=1500) {
-    const resp = await fetch("https://api.anthropic.com/v1/messages", {
-      method:"POST", headers:{"Content-Type":"application/json","x-api-key":ANTHROPIC_API_KEY,"anthropic-version":"2023-06-01","anthropic-dangerous-direct-browser-access":"true"},
-      body:JSON.stringify({model:"claude-sonnet-4-20250514",max_tokens:maxTokens,messages:[{role:"user",content}]})
+    const resp = await fetch(PROXY_URL, {
+      method:"POST", headers:{"Content-Type":"application/json"},
+      body:JSON.stringify({model: "claude-haiku-4-5-20251001",max_tokens:maxTokens,messages:[{role:"user",content}]})
     });
     const data = await resp.json();
     if (data.error) throw new Error(data.error.message||"API error");
@@ -3804,9 +3804,9 @@ Based on the EDITED profile above, return ONLY valid JSON updating the eligibili
 
 Rules: scores 0-100. Summary max 2 sentences. Reflect any improvements from edited fields. Return ONLY the JSON object.`;
 
-      const resp = await fetch("https://api.anthropic.com/v1/messages", {
-        method:"POST", headers:{"Content-Type":"application/json","x-api-key":ANTHROPIC_API_KEY,"anthropic-version":"2023-06-01","anthropic-dangerous-direct-browser-access":"true"},
-        body:JSON.stringify({ model:"claude-sonnet-4-20250514", max_tokens:800,
+      const resp = await fetch(PROXY_URL, {
+        method:"POST", headers:{"Content-Type":"application/json"},
+        body:JSON.stringify({ model: "claude-haiku-4-5-20251001", max_tokens:800,
           messages:[{role:"user",content:prompt}] })
       });
       const data = await resp.json();
